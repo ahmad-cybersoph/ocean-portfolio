@@ -1,17 +1,5 @@
 "use client";
 
-/**
- * OceanPortfolio — UNDERWATER scene: god-ray sunlight, seabed caustics, bubbles
- * -----------------------------------------------------------------------------
- * - Deep-blue underwater atmosphere with volumetric light shafts from the
- *   surface, caustic light-network on the seabed, and rising bubbles.
- * - Move the cursor => the water/light gently ripples & refracts.
- * - Click => a splash disturbance.
- *
- * NEXT.JS: rename to .tsx, add "use client" on top, `npm i three`,
- *          photo at public/portrait.png, edit CONFIG.
- */
-
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
@@ -19,19 +7,22 @@ const CONFIG = {
   availability: ["AVAILABLE", "FOR HIRE"],
   availabilitySub: "REMOTELY",
   bigWord: "PORTFOLIO",
-  name: "MUHAMED GHAREB",
-  title: "SR.FRONTEND DEVELOPER",
-  years: "+10 YEARS",
-  tagline: ["Selected work across branding, digital,", "print, and visual communication."],
+  name: "AHMAD RAZA",
+  title: "JR.FRONTEND DEVELOPER",
+  years: "1.5 YEARS",
+  tagline: [
+    "Selected work across branding, digital,",
+    "print, and visual communication.",
+  ],
   photo: "/portrait.png",
 };
 
 /* ---- tune these ---- */
 const DAMPING = 0.99;
 const NORMAL_STRENGTH = 6.0;
-const REFRACT = 0.020;   // ripple distortion (kept subtle; bubbles do the work)
+const REFRACT = 0.02; // ripple distortion (kept subtle; bubbles do the work)
 const AMB = 0.008;
-const LIGHT_X = 0.62;    // sun position across the surface (keeps left readable)
+const LIGHT_X = 0.62; // sun position across the surface (keeps left readable)
 const SCRIM = 0.42;
 const SIM_MAX = 760;
 
@@ -266,50 +257,80 @@ export default function OceanPortfolio() {
     const cleanup: Array<() => void> = [];
 
     try {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false });
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: false,
+        alpha: false,
+      });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
       const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
       const geo = new THREE.PlaneGeometry(2, 2);
       const MAXB = 40;
-      const bub = Array.from({ length: MAXB }, () => new THREE.Vector4(0, 0, -99, 0));
+      const bub = Array.from(
+        { length: MAXB },
+        () => new THREE.Vector4(0, 0, -99, 0),
+      );
       let bhead = 0;
 
       const rtOpts = {
-        type: THREE.HalfFloatType, format: THREE.RGBAFormat,
-        minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
-        wrapS: THREE.ClampToEdgeWrapping, wrapT: THREE.ClampToEdgeWrapping,
-        depthBuffer: false, stencilBuffer: false,
+        type: THREE.HalfFloatType,
+        format: THREE.RGBAFormat,
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        wrapS: THREE.ClampToEdgeWrapping,
+        wrapT: THREE.ClampToEdgeWrapping,
+        depthBuffer: false,
+        stencilBuffer: false,
       };
-      let rtA!: THREE.WebGLRenderTarget, rtB!: THREE.WebGLRenderTarget, simW: number, simH: number;
+      let rtA!: THREE.WebGLRenderTarget,
+        rtB!: THREE.WebGLRenderTarget,
+        simW: number,
+        simH: number;
 
       const simMat = new THREE.ShaderMaterial({
-        vertexShader: vert, fragmentShader: simFrag,
+        vertexShader: vert,
+        fragmentShader: simFrag,
         uniforms: {
-          u_prev: { value: null }, u_texel: { value: new THREE.Vector2() },
+          u_prev: { value: null },
+          u_texel: { value: new THREE.Vector2() },
           u_mouse: { value: new THREE.Vector2(-9, -9) },
           u_mousePrev: { value: new THREE.Vector2(-9, -9) },
-          u_force: { value: 0 }, u_radius: { value: 0.02 },
+          u_force: { value: 0 },
+          u_radius: { value: 0.02 },
           u_click: { value: new THREE.Vector2(-9, -9) },
-          u_clickForce: { value: 0 }, u_clickRadius: { value: 0.055 },
-          u_aspect: { value: 1 }, u_damping: { value: DAMPING },
+          u_clickForce: { value: 0 },
+          u_clickRadius: { value: 0.055 },
+          u_aspect: { value: 1 },
+          u_damping: { value: DAMPING },
         },
       });
       const dispMat = new THREE.ShaderMaterial({
-        vertexShader: vert, fragmentShader: dispFrag,
-        uniforms: { u_height: { value: null }, u_texel: { value: new THREE.Vector2() }, u_time: { value: 0 }, u_aspect: { value: 1 }, u_bubbles: { value: bub } },
+        vertexShader: vert,
+        fragmentShader: dispFrag,
+        uniforms: {
+          u_height: { value: null },
+          u_texel: { value: new THREE.Vector2() },
+          u_time: { value: 0 },
+          u_aspect: { value: 1 },
+          u_bubbles: { value: bub },
+        },
       });
 
-      const simScene = new THREE.Scene(); simScene.add(new THREE.Mesh(geo, simMat));
-      const dispScene = new THREE.Scene(); dispScene.add(new THREE.Mesh(geo, dispMat));
+      const simScene = new THREE.Scene();
+      simScene.add(new THREE.Mesh(geo, simMat));
+      const dispScene = new THREE.Scene();
+      dispScene.add(new THREE.Mesh(geo, dispMat));
 
       const build = () => {
-        const w = window.innerWidth, h = window.innerHeight;
+        const w = window.innerWidth,
+          h = window.innerHeight;
         renderer.setSize(w, h, false);
         const aspect = w / h;
         const scale = Math.min(SIM_MAX / Math.max(w, h), 1);
         simW = Math.max(2, Math.floor(w * scale));
         simH = Math.max(2, Math.floor(h * scale));
-        if (rtA) rtA.dispose(); if (rtB) rtB.dispose();
+        if (rtA) rtA.dispose();
+        if (rtB) rtB.dispose();
         rtA = new THREE.WebGLRenderTarget(simW, simH, rtOpts);
         rtB = new THREE.WebGLRenderTarget(simW, simH, rtOpts);
         const texel = new THREE.Vector2(1 / simW, 1 / simH);
@@ -325,31 +346,59 @@ export default function OceanPortfolio() {
       const clock = new THREE.Clock();
       const mouse = new THREE.Vector2(-9, -9);
       const framePrev = new THREE.Vector2(-9, -9);
-      let haveMouse = false, clickForce = 0;
+      let haveMouse = false,
+        clickForce = 0;
       const lastSpawn = new THREE.Vector2(-9, -9);
-      const spawnBubble = (x: number, y: number, size: number) => { bub[bhead].set(x, y, clock.getElapsedTime(), size); bhead = (bhead + 1) % MAXB; };
+      const spawnBubble = (x: number, y: number, size: number) => {
+        bub[bhead].set(x, y, clock.getElapsedTime(), size);
+        bhead = (bhead + 1) % MAXB;
+      };
 
       const toUV = (e: PointerEvent) => {
         const rect = canvas.getBoundingClientRect();
-        return new THREE.Vector2((e.clientX - rect.left) / rect.width, 1 - (e.clientY - rect.top) / rect.height);
+        return new THREE.Vector2(
+          (e.clientX - rect.left) / rect.width,
+          1 - (e.clientY - rect.top) / rect.height,
+        );
       };
       const onMove = (e: PointerEvent) => {
         const p = toUV(e);
-        if (!haveMouse) { mouse.copy(p); framePrev.copy(p); lastSpawn.copy(p); haveMouse = true; return; }
+        if (!haveMouse) {
+          mouse.copy(p);
+          framePrev.copy(p);
+          lastSpawn.copy(p);
+          haveMouse = true;
+          return;
+        }
         mouse.copy(p);
         const d = p.distanceTo(lastSpawn);
-        if (d > 0.012) {                                  // bubble trail
+        if (d > 0.012) {
+          // bubble trail
           const n = Math.min(3, 1 + Math.floor(d * 28));
           for (let i = 0; i < n; i++)
-            spawnBubble(p.x + (Math.random() - 0.5) * 0.012, p.y + (Math.random() - 0.5) * 0.012, 0.006 + Math.random() * 0.008);
+            spawnBubble(
+              p.x + (Math.random() - 0.5) * 0.012,
+              p.y + (Math.random() - 0.5) * 0.012,
+              0.006 + Math.random() * 0.008,
+            );
           lastSpawn.copy(p);
         }
       };
       const onDown = (e: PointerEvent) => {
-        const p = toUV(e); mouse.copy(p); simMat.uniforms.u_click.value.copy(p);
-        clickForce = 0.5;                                  // softer shake
-        for (let i = 0; i < 18; i++)                       // bubble burst
-          spawnBubble(p.x + (Math.random() - 0.5) * 0.05, p.y + (Math.random() - 0.5) * 0.03, 0.006 + Math.random() * 0.013);
+        const p = toUV(e);
+        mouse.copy(p);
+        simMat.uniforms.u_click.value.copy(p);
+        clickForce = 0.5; // softer shake
+        for (
+          let i = 0;
+          i < 18;
+          i++ // bubble burst
+        )
+          spawnBubble(
+            p.x + (Math.random() - 0.5) * 0.05,
+            p.y + (Math.random() - 0.5) * 0.03,
+            0.006 + Math.random() * 0.013,
+          );
       };
       window.addEventListener("pointermove", onMove, { passive: true });
       window.addEventListener("pointerdown", onDown, { passive: true });
@@ -366,7 +415,9 @@ export default function OceanPortfolio() {
         simMat.uniforms.u_clickForce.value = clickForce;
         renderer.setRenderTarget(rtB);
         renderer.render(simScene, cam);
-        const tmp = rtA; rtA = rtB; rtB = tmp;
+        const tmp = rtA;
+        rtA = rtB;
+        rtB = tmp;
         clickForce *= 0.72;
         framePrev.copy(mouse);
         dispMat.uniforms.u_height.value = rtA.texture;
@@ -379,66 +430,137 @@ export default function OceanPortfolio() {
 
       cleanup.push(() => {
         cancelAnimationFrame(raf);
-        rtA && rtA.dispose(); rtB && rtB.dispose();
-        geo.dispose(); simMat.dispose(); dispMat.dispose(); renderer?.dispose();
+        rtA && rtA.dispose();
+        rtB && rtB.dispose();
+        geo.dispose();
+        simMat.dispose();
+        dispMat.dispose();
+        renderer?.dispose();
       });
-    } catch (err) { console.error("WebGL init failed:", err); }
+    } catch (err) {
+      console.error("WebGL init failed:", err);
+    }
 
-    return () => { cleanup.forEach((f) => f()); };
+    return () => {
+      cleanup.forEach((f) => f());
+    };
   }, []);
 
-  const font = "var(--font-montserrat), 'Century Gothic', 'Futura', system-ui, sans-serif";
-  const sh = "0 2px 26px rgba(0,10,22,.9), 0 1px 3px rgba(0,10,22,.7)";
+  // only the seniority prefix ("JR", "SR") is bold — everything from the dot on
+  // stays regular weight
+  const dot = CONFIG.title.indexOf(".");
+  const titleLead = dot > 0 ? CONFIG.title.slice(0, dot) : CONFIG.title;
+  const titleRest = dot > 0 ? CONFIG.title.slice(dot) : "";
 
   return (
-    <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden", background: "linear-gradient(180deg,#0b3550,#06243a 55%,#03121f)", color: "#eaf7ff", fontFamily: font }}>
-      <canvas ref={canvasRef} style={{ position: "fixed", inset: 0, width: "100%", height: "100%", display: "block", zIndex: 0 }} />
+    <div className="relative min-h-screen w-full overflow-hidden bg-[linear-gradient(180deg,#0b3550,#06243a_55%,#03121f)] font-sans text-foam">
+      <canvas ref={canvasRef} className="fixed inset-0 z-0 block h-full w-full" />
 
-      <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none",
-        background: `linear-gradient(100deg, rgba(1,14,26,${SCRIM}) 0%, rgba(1,14,26,${SCRIM * 0.5}) 30%, rgba(1,14,26,0) 58%), linear-gradient(to top, rgba(1,14,26,0.4) 0%, rgba(1,14,26,0) 24%)` }} />
+      {/* readability scrim — inline because it is driven by the SCRIM constant above */}
+      <div
+        className="pointer-events-none fixed inset-0 z-[1]"
+        style={{
+          background: `linear-gradient(100deg, rgba(1,14,26,${SCRIM}) 0%, rgba(1,14,26,${SCRIM * 0.5}) 30%, rgba(1,14,26,0) 58%), linear-gradient(to top, rgba(1,14,26,0.4) 0%, rgba(1,14,26,0) 24%)`,
+        }}
+      />
 
-      <div style={{ position: "relative", zIndex: 2, pointerEvents: "none", minHeight: "100vh", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "clamp(1.6rem, 5vw, 4rem)" }}>
-        <div style={{ maxWidth: "60%" }}>
-          <svg width="42" height="42" viewBox="0 0 42 42" style={{ marginBottom: "1.6rem", filter: "drop-shadow(0 2px 12px rgba(0,10,22,.8))" }}>
-            <rect x="1.5" y="1.5" width="39" height="39" rx="7" fill="none" stroke="#eaf7ff" strokeWidth="2.4" />
-            <path d="M13 29 L13 13 L23 13 Q30 13 30 20 Q30 26 23 26 L18 26" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
+      <div className="pointer-events-none relative z-[2] flex min-h-screen flex-col justify-between p-[clamp(1.6rem,5vw,4rem)]">
+        <div className="max-w-[60%]">
+          <svg
+            width="42"
+            height="42"
+            viewBox="0 0 42 42"
+            className="mb-[1.6rem] drop-shadow-[0_2px_12px_rgba(0,10,22,.8)]"
+          >
+            <rect
+              x="1.5"
+              y="1.5"
+              width="39"
+              height="39"
+              rx="7"
+              fill="none"
+              stroke="#eaf7ff"
+              strokeWidth="2.4"
+            />
+            <path
+              d="M13 29 L13 13 L23 13 Q30 13 30 20 Q30 26 23 26 L18 26"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
           </svg>
-          <div style={{ fontWeight: 300, letterSpacing: "0.14em", lineHeight: 1.12, fontSize: "clamp(1.6rem, 3.6vw, 3rem)", textShadow: sh }}>
-            {CONFIG.availability.map((l) => <div key={l}>{l}</div>)}
+          <div className="text-shadow-deep text-[clamp(1.6rem,3.6vw,3rem)] font-light leading-[1.12] tracking-[0.14em]">
+            {CONFIG.availability.map((l) => (
+              <div key={l}>{l}</div>
+            ))}
           </div>
-          <div style={{ marginTop: ".55rem", fontWeight: 300, letterSpacing: "0.32em", fontSize: "clamp(.7rem,1.4vw,1rem)", opacity: 0.92, textShadow: sh }}>{CONFIG.availabilitySub}</div>
+          <div className="text-shadow-deep mt-[.55rem] text-[clamp(.7rem,1.4vw,1rem)] font-light tracking-[0.32em] opacity-[0.92]">
+            {CONFIG.availabilitySub}
+          </div>
         </div>
 
-        <div style={{ maxWidth: "62%", marginTop: "auto", marginBottom: "auto" }}>
-          <h1 style={{ margin: 0, fontWeight: 300, letterSpacing: "0.02em", lineHeight: 0.95, fontSize: "clamp(3rem, 12.5vw, 11rem)", whiteSpace: "nowrap", textShadow: "0 6px 50px rgba(0,10,22,.85)" }}>
-            <span style={{ color: "#eaf7ff" }}>{CONFIG.bigWord.slice(0, 4)}</span>
-            <span style={{ background: "linear-gradient(90deg,#eaf7ff,#9fe6ff 55%,#4fccf5)", WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent" }}>{CONFIG.bigWord.slice(4)}</span>
+        <div className="my-auto max-w-[62%]">
+          <h1 className="text-shadow-title m-0 whitespace-nowrap text-[clamp(3rem,12.5vw,11rem)] font-light leading-[0.95] tracking-[0.02em]">
+            <span className="text-foam">{CONFIG.bigWord.slice(0, 4)}</span>
+            <span className="bg-[linear-gradient(90deg,#eaf7ff,#9fe6ff_55%,#4fccf5)] bg-clip-text text-transparent [-webkit-text-fill-color:transparent]">
+              {CONFIG.bigWord.slice(4)}
+            </span>
           </h1>
-          <div style={{ marginTop: "clamp(1rem,2.4vw,2rem)", textShadow: sh }}>
-            <div style={{ fontWeight: 700, letterSpacing: "0.08em", fontSize: "clamp(1rem,2vw,1.6rem)" }}>{CONFIG.name}</div>
-            <div style={{ marginTop: ".45rem", letterSpacing: "0.06em", fontSize: "clamp(.8rem,1.4vw,1.1rem)", opacity: 0.92 }}>
-              <b style={{ fontWeight: 700 }}>{CONFIG.title.split(" ")[0]} </b>{CONFIG.title.split(" ").slice(1).join(" ")}
+          <div className="text-shadow-deep mt-[clamp(1rem,2.4vw,2rem)]">
+            <div className="text-[clamp(1rem,2vw,1.6rem)] font-bold tracking-[0.08em]">
+              {CONFIG.name}
             </div>
-            <div style={{ marginTop: ".3rem", fontWeight: 700, letterSpacing: "0.06em", fontSize: "clamp(.8rem,1.4vw,1.1rem)" }}>{CONFIG.years}</div>
+            <div className="mt-[.45rem] text-[clamp(.8rem,1.4vw,1.1rem)] tracking-[0.06em] opacity-[0.92]">
+              <b className="font-bold">{titleLead}</b>
+              {titleRest}
+            </div>
+            <div className="mt-[.3rem] text-[clamp(.8rem,1.4vw,1.1rem)] font-bold tracking-[0.06em]">
+              {CONFIG.years}
+            </div>
           </div>
         </div>
 
-        <div style={{ maxWidth: "60%", fontWeight: 500, lineHeight: 1.5, letterSpacing: "0.01em", fontSize: "clamp(.85rem,1.6vw,1.15rem)", textShadow: sh }}>
-          {CONFIG.tagline.map((l) => <div key={l}>{l}</div>)}
+        <div className="text-shadow-deep max-w-[60%] text-[clamp(.85rem,1.6vw,1.15rem)] font-medium leading-[1.5] tracking-[0.01em]">
+          {CONFIG.tagline.map((l) => (
+            <div key={l}>{l}</div>
+          ))}
         </div>
       </div>
 
-      <div style={{ position: "absolute", right: "clamp(1rem, 5vw, 6rem)", bottom: 0, zIndex: 2, height: "clamp(48vh, 62vh, 92vh)", aspectRatio: "3 / 4", display: "flex", alignItems: "flex-end", justifyContent: "center", pointerEvents: "none" }}>
+      <div className="pointer-events-none absolute bottom-0 right-[clamp(1rem,5vw,6rem)] z-[2] flex aspect-[3/4] h-[clamp(48vh,62vh,92vh)] items-end justify-center">
         {imgOk ? (
-          <img src={CONFIG.photo} alt="portrait" onError={() => setImgOk(false)} style={{ height: "100%", width: "100%", objectFit: "contain", filter: "grayscale(100%) contrast(1.05)" }} />
+          /* The photo is already colour-graded for this scene (caustics, teal cast),
+             so it keeps its colour — a grayscale filter here would throw that away.
+             portrait-blend feathers the opaque rectangle into the water. */
+          <img
+            src={CONFIG.photo}
+            alt={CONFIG.name}
+            onError={() => setImgOk(false)}
+            className="portrait-blend h-full w-full object-contain contrast-[1.05] saturate-[1.06]"
+          />
         ) : (
-          <div style={{ height: "80%", width: "78%", borderRadius: 18, border: "1px solid rgba(234,247,255,0.32)", background: "linear-gradient(180deg, rgba(234,247,255,0.12), rgba(234,247,255,0.03))", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
-            <svg width="96" height="120" viewBox="0 0 96 120" fill="none" stroke="rgba(234,247,255,0.55)" strokeWidth="2.4">
+          <div
+            className="flex h-[80%] w-[78%] flex-col items-center justify-center gap-[14px] rounded-[18px] border border-[rgba(234,247,255,0.32)] bg-[linear-gradient(180deg,rgba(234,247,255,0.12),rgba(234,247,255,0.03))] backdrop-blur-[6px]"
+          >
+            <svg
+              width="96"
+              height="120"
+              viewBox="0 0 96 120"
+              fill="none"
+              stroke="rgba(234,247,255,0.55)"
+              strokeWidth="2.4"
+            >
               <circle cx="48" cy="30" r="17" />
-              <path d="M30 47 q18 12 36 0 l6 26 h-12 l-4 21 h-16 l-4 -21 h-12 z" strokeLinejoin="round" />
+              <path
+                d="M30 47 q18 12 36 0 l6 26 h-12 l-4 21 h-16 l-4 -21 h-12 z"
+                strokeLinejoin="round"
+              />
             </svg>
-            <div style={{ fontFamily: font, fontWeight: 300, letterSpacing: "0.18em", fontSize: ".72rem", opacity: 0.8, textAlign: "center" }}>
-              YOUR PHOTO<br /><span style={{ opacity: 0.7 }}>public/portrait.png</span>
+            <div className="text-center font-sans text-[.72rem] font-light tracking-[0.18em] opacity-80">
+              YOUR PHOTO
+              <br />
+              <span className="opacity-70">public/portrait.png</span>
             </div>
           </div>
         )}
