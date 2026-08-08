@@ -1,0 +1,70 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+  background: #03121f; /* avoids a white flash before the canvas paints */
+}
+
+/* ---------------------------------------------------------------------------
+   Custom cursor — sliced out of public/cursor.png into hotspot-aligned assets.
+   The three declarations are a progressive-enhancement stack: plain url() for
+   every browser, then -webkit-image-set / image-set so HiDPI screens get the
+   @2x art. Browsers that don't understand image-set() drop those two lines and
+   keep the 1x url() above them.
+   Numbers after the url are the hotspot (the "point" of the cursor) in px.
+--------------------------------------------------------------------------- */
+html,
+body,
+* {
+  cursor: url("/cursor-arrow.png") 5 5, auto;
+  cursor: -webkit-image-set(url("/cursor-arrow.png") 1x, url("/cursor-arrow@2x.png") 2x) 5 5, auto;
+  cursor: image-set(url("/cursor-arrow.png") 1x, url("/cursor-arrow@2x.png") 2x) 5 5, auto;
+}
+
+/* pointing hand on anything clickable */
+a,
+button,
+summary,
+label[for],
+select,
+[role="button"],
+[role="link"],
+[role="tab"],
+[data-cursor="hand"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+input[type="color"],
+input[type="file"] {
+  cursor: url("/cursor-hand.png") 14 5, pointer;
+  cursor: -webkit-image-set(url("/cursor-hand.png") 1x, url("/cursor-hand@2x.png") 2x) 14 5, pointer;
+  cursor: image-set(url("/cursor-hand.png") 1x, url("/cursor-hand@2x.png") 2x) 14 5, pointer;
+}
+
+/* text fields keep the native caret — a big arrow there hurts more than it helps */
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+textarea,
+[contenteditable="true"] {
+  cursor: text;
+}
+
+:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+  }
+}
