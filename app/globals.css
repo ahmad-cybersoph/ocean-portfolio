@@ -62,13 +62,19 @@
    Numbers after the url are the hotspot (the "point" of the cursor) in px.
    These sit outside any @layer so they outrank Tailwind's preflight, which
    would otherwise force cursor:pointer onto buttons.
+
+   SIZE LIMIT — do not exceed 32x32 CSS px. Chrome and Firefox both refuse to
+   paint a larger custom cursor while the pointer is near the edge of the
+   content area (an anti-cursorjacking mitigation), which reverts the cursor to
+   the OS arrow in a band around the whole page. The art is therefore 26x32
+   (52x64 for the @2x variant, which is still 26x32 CSS px).
 --------------------------------------------------------------------------- */
 html,
 body,
 * {
-  cursor: url("/cursor-arrow.png") 5 5, auto;
-  cursor: -webkit-image-set(url("/cursor-arrow.png") 1x, url("/cursor-arrow@2x.png") 2x) 5 5, auto;
-  cursor: image-set(url("/cursor-arrow.png") 1x, url("/cursor-arrow@2x.png") 2x) 5 5, auto;
+  cursor: url("/cursor-arrow.png") 4 4, auto;
+  cursor: -webkit-image-set(url("/cursor-arrow.png") 1x, url("/cursor-arrow@2x.png") 2x) 4 4, auto;
+  cursor: image-set(url("/cursor-arrow.png") 1x, url("/cursor-arrow@2x.png") 2x) 4 4, auto;
 }
 
 /* pointing hand on anything clickable */
@@ -89,9 +95,9 @@ input[type="radio"],
 input[type="range"],
 input[type="color"],
 input[type="file"] {
-  cursor: url("/cursor-hand.png") 14 5, pointer;
-  cursor: -webkit-image-set(url("/cursor-hand.png") 1x, url("/cursor-hand@2x.png") 2x) 14 5, pointer;
-  cursor: image-set(url("/cursor-hand.png") 1x, url("/cursor-hand@2x.png") 2x) 14 5, pointer;
+  cursor: url("/cursor-hand.png") 11 4, pointer;
+  cursor: -webkit-image-set(url("/cursor-hand.png") 1x, url("/cursor-hand@2x.png") 2x) 11 4, pointer;
+  cursor: image-set(url("/cursor-hand.png") 1x, url("/cursor-hand@2x.png") 2x) 11 4, pointer;
 }
 
 /* text fields keep the native caret — a big arrow there hurts more than it helps */

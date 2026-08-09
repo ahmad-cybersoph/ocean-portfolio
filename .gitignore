@@ -7,3 +7,5 @@ build
 .env*.local
 .vercel
 next-env.d.ts
+
+.vercel
