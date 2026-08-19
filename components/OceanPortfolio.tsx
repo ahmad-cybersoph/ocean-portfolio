@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import AmbienceToggle from "./AmbienceToggle";
 import { hasWebGL, RippleWater, type UvRect } from "./water/rippleWater";
 import { heroFallbackFilter } from "./water/shaders";
 
@@ -349,6 +350,8 @@ export default function OceanPortfolio() {
       </div>
 
       {mode === "fallback" && <FallbackRipples />}
+
+      <AmbienceToggle />
     </div>
   );
 }

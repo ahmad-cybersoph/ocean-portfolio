@@ -142,6 +142,23 @@ textarea,
   }
 }
 
+/* The outer arc of the speaker icon breathes while sound is playing, so the
+   "on" state reads at a glance without a label. The reduced-motion rule below
+   collapses it to a still frame. */
+.ambience-wave {
+  animation: ambience-wave 3.4s ease-in-out infinite;
+}
+
+@keyframes ambience-wave {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 /* respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * {
